@@ -21,14 +21,5 @@
 What is Burp Suite Collaborator? The Collaborator client in Burp allows you to generate Collaborator links and monitor DNS, HTTP, and SMTP interactions made by external services.</description>
     </item>
     
-    <item>
-      <title>BlueKeep - The worms are on the horizon</title>
-      <link>https://calumboal.com/posts/bluekeep/</link>
-      <pubDate>Fri, 30 Aug 2019 21:47:59 +0100</pubDate>
-      
-      <guid>https://calumboal.com/posts/bluekeep/</guid>
-      <description>What is BlueKeep? Since it&amp;rsquo;s disclosure on May 14th it&amp;rsquo;s been hard to escape news coverage of the omnipresent omnishambles that is Bluekeep. Of course, this is understandable; because a critical vulnerability in Window’s Remote Desktop Protocol that affects Windows 2000 through 7&amp;frasl;2008 R2 is no laughing matter. Particularly when you consider that if successfully exploited it results in a remote code execution with Window’s highest possible level of privilege: NT_AUTHORITY/SYSTEM - which surpasses even ‘Administrator’.</description>
-    </item>
-    
   </channel>
 </rss>
