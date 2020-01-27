@@ -17,7 +17,7 @@
       <pubDate>Sun, 26 Jan 2020 16:32:56 +0100</pubDate>
       
       <guid>https://calumboal.com/posts/abusing-kerberos/</guid>
-      <description>This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high quality blog posts detailing common Kerberos attacks.
+      <description>(Ab)using Kerberos from Linux This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high-quality blog posts detailing common Kerberos attacks.
 Kerberos Overview Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&#39;s beneficial to be fluent in Kerberos manipulation when performing penetration tests.</description>
     </item>
     
