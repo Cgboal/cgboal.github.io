@@ -6,7 +6,7 @@
     <description>Recent content in Posts on Calum Boal</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 26 Jan 2020 16:32:56 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 26 Jan 2020 18:32:56 +0100</lastBuildDate>
     
 	<atom:link href="https://calumboal.com/posts/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>(Ab)using Kerberos from Linux</title>
       <link>https://calumboal.com/posts/abusing-kerberos/</link>
-      <pubDate>Sun, 26 Jan 2020 16:32:56 +0100</pubDate>
+      <pubDate>Sun, 26 Jan 2020 18:32:56 +0100</pubDate>
       
       <guid>https://calumboal.com/posts/abusing-kerberos/</guid>
       <description>This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high-quality blog posts detailing common Kerberos attacks.
