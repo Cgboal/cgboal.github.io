@@ -1,23 +1,37 @@
 <!doctype html>
 <html lang="en-us">
   <head>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name":  null ,
+  "url":  null ,
+  "sameAs": [
+    "https://www.facebook.com/",
+    "https://www.instagram.com/",
+    "https://twitter.com/",
+    "https://github.com/"
+  ]
+}
+</script>
+
+        
     <title>(Ab)using Kerberos from Linux // Calum Boal</title>
     <meta charset="utf-8" />
-    <meta name="generator" content="Hugo 0.62.0" />
+    <meta name="generator" content="Hugo 0.68.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="author" content="John Doe" />
-    <meta name="description" content="" />
+    <meta name="author" content="Calum Boal" />
+    <meta name="description" content="A guide on various Kerberos abuse and exploitation techniques, including kerberoasting, golden tickets, contrained delegation, unconstrained delegation, silver tickets, TGT&#39;s, all from Linux using Impacket" />
     <link rel="stylesheet" href="https://calumboal.com/css/main.min.59023e5fd38d6ecb0e1dfbb295077c3c67e00e3b9eb3feaf34b5a5e6b332897a.css" />
-
     
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="(Ab)using Kerberos from Linux"/>
-<meta name="twitter:description" content="This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high-quality blog posts detailing common Kerberos attacks.
-Kerberos Overview Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&#39;s beneficial to be fluent in Kerberos manipulation when performing penetration tests."/>
+<meta name="twitter:description" content="A guide on various Kerberos abuse and exploitation techniques, including kerberoasting, golden tickets, contrained delegation, unconstrained delegation, silver tickets, TGT&#39;s, all from Linux using Impacket"/>
 
     <meta property="og:title" content="(Ab)using Kerberos from Linux" />
-<meta property="og:description" content="This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high-quality blog posts detailing common Kerberos attacks.
-Kerberos Overview Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&#39;s beneficial to be fluent in Kerberos manipulation when performing penetration tests." />
+<meta property="og:description" content="A guide on various Kerberos abuse and exploitation techniques, including kerberoasting, golden tickets, contrained delegation, unconstrained delegation, silver tickets, TGT&#39;s, all from Linux using Impacket" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://calumboal.com/posts/abusing-kerberos/" />
 <meta property="article:published_time" content="2020-01-26T18:32:56+01:00" />
@@ -27,7 +41,7 @@ Kerberos Overview Before we jump into it, a brief preface shall be provided rega
   </head>
   <body>
     <header class="app-header">
-      <a href="https://calumboal.com/"><img class="app-header-avatar" src="/img/avatar.png" alt="John Doe" /></a>
+      <a href="https://calumboal.com/"><img class="app-header-avatar" src="https://calumboal.com/img/avatar.png" alt="Calum Boal" /></a>
       <h1>Calum Boal</h1>
       <div style="display: inline-block">
 	 <script src="https://www.hackthebox.eu/badge/6894"></script>
@@ -72,19 +86,19 @@ Kerberos Overview Before we jump into it, a brief preface shall be provided rega
     <div class="post-content">
       <p>This post aims to provide an overview of tooling available to perform common Kerberos abuse techniques from Linux. While this blog will not go into great detail about how the attacks which utilize these techniques work, references will be provided to high-quality blog posts detailing common Kerberos attacks.</p>
 <h3 id="kerberos-overview">Kerberos Overview</h3>
-<p>Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it's beneficial to be fluent in Kerberos manipulation when performing penetration tests.</p>
-<p>Kerberos was first created at MIT and was later released as an open-source project towards the end of the 1980s. Kerberos aimed to solve the problem of allowing users to authenticate with a multitude of services deployed across many hosts, without the need to make the services themselves aware of the user's individual credentials prior to authentication.</p>
+<p>Before we jump into it, a brief preface shall be provided regarding the function of Kerberos within Active Directory, and why it&rsquo;s beneficial to be fluent in Kerberos manipulation when performing penetration tests.</p>
+<p>Kerberos was first created at MIT and was later released as an open-source project towards the end of the 1980s. Kerberos aimed to solve the problem of allowing users to authenticate with a multitude of services deployed across many hosts, without the need to make the services themselves aware of the user&rsquo;s individual credentials prior to authentication.</p>
 <p>MIT attempts to solve this problem by utilizing a centralized authentication daemon, which allows users to authenticate with the Kerberos service, and request tickets to access services existing outwith the context of the Kerberos service itself. These tickets would contain information identifying the user who requested the ticket and would also <em>be encrypted with the password of the service account</em>.</p>
 <p>Once the user has received the requested ticket, they send it on to the service (principals) they wish to access. As the ticket is encrypted by the Kerberos service using the password of the requested service, the receiving service can <em>verify the authenticity of the ticket by successfully decrypting the ticket</em>. Once decrypted, the receiving service can verify that the identifying information within the decrypted ticket <em>matches that of the user who sent the ticket</em>.</p>
-<p>To prevent users from having to manually authenticate with the Kerberos service every time they wish to access another service, the Kerberos service issues a ticket to the user for the Kerberos service itself. The ticket obtained from this process is known as a ticket-granting ticket (TGT). The TGT is then used in place of the user's credentials when requesting tickets for other services from the Kerberos service. It is important to note that as tickets are encrypted with the password of the service they are valid for, TGT's are encrypted with the password of the Kerberos service itself (in AD, this is the krbtgt user's NTLM hash).</p>
+<p>To prevent users from having to manually authenticate with the Kerberos service every time they wish to access another service, the Kerberos service issues a ticket to the user for the Kerberos service itself. The ticket obtained from this process is known as a ticket-granting ticket (TGT). The TGT is then used in place of the user&rsquo;s credentials when requesting tickets for other services from the Kerberos service. It is important to note that as tickets are encrypted with the password of the service they are valid for, TGT&rsquo;s are encrypted with the password of the Kerberos service itself (in AD, this is the krbtgt user&rsquo;s NTLM hash).</p>
 <p>Obviously the above is a great oversimplification of Kerberos version 4+, however, it conveys the core idea behind Kerberos, without going into much of the complexity which was added to mitigate certain weaknesses. To read more about how Kerberos functions, I would recommend checking out the <a href="https://web.mit.edu/kerberos/dialogue.html">dialogue released</a> by MIT regarding the design of Kerberos. Having read several explanations of Kerberos, the MIT dialogue was the first to make Kerberos click for me in a substantial, yet slightly cringe fashion.</p>
-<p>Within Active Directory environments Kerberos, which can be found on port 88/TCP of Domain Controllers, allows users to authenticate with services such as CIFS (SMB shares), LDAP, Databases, etc. Additional Service Principal Names (SPN's) can also be created for other services that may be accessed using Kerberos authentication.</p>
+<p>Within Active Directory environments Kerberos, which can be found on port 88/TCP of Domain Controllers, allows users to authenticate with services such as CIFS (SMB shares), LDAP, Databases, etc. Additional Service Principal Names (SPN&rsquo;s) can also be created for other services that may be accessed using Kerberos authentication.</p>
 <h3 id="why-do-we-need-to-use-kerberos">Why do we need to use Kerberos?</h3>
-<p>Now, you might be thinking that since you need a user's credentials (NTLM hash) to request a Kerberos ticket within Active Directory you might as well just use the credentials instead of tickets to authenticate with services such as SMB or LDAP. To a degree, you'd be correct in this assertion, using recovered credentials typically is easier than using tickets, however, tickets afford you certain benefits beyond those available by simply using credentials; namely:</p>
+<p>Now, you might be thinking that since you need a user&rsquo;s credentials (NTLM hash) to request a Kerberos ticket within Active Directory you might as well just use the credentials instead of tickets to authenticate with services such as SMB or LDAP. To a degree, you&rsquo;d be correct in this assertion, using recovered credentials typically is easier than using tickets, however, tickets afford you certain benefits beyond those available by simply using credentials; namely:</p>
 <ul>
 <li>Some services do not allow direct logon via NTLM authentication and may require tickets</li>
 <li>Kerberos is required to abuse constrained/unconstrained delegation permissions</li>
-<li>Even if the user's credentials are changed, the ticket will remain valid (until it expires)</li>
+<li>Even if the user&rsquo;s credentials are changed, the ticket will remain valid (until it expires)</li>
 <li>Golden tickets can be forged which essentially never expire and can be used to persist access to services</li>
 <li>Tickets can also be forged which allow pivoting between domains in a forest with a trust relationship</li>
 <li>Kerberoasting attacks can often yield high-privileged credentials</li>
@@ -119,12 +133,12 @@ NETLOGON
 SYSVOL
 # 
 </code></pre><h2 id="impersonation-tickets">Impersonation tickets</h2>
-<p>If you're lucky, you may find yourself in a situation where you've compromised a host or account, with some form of delegation rights configured (constrained or unconstrained). Thus, allowing you to request Kerberos tickets which can be used to impersonate arbitrary users when authenticating against certain SPN's (depending on the delegation configuration).</p>
-<p>I won't go into detail regarding the delegation process as it's rather complex, however, I will refer you to the following resources which cover abusing delegation in-depth:</p>
+<p>If you&rsquo;re lucky, you may find yourself in a situation where you&rsquo;ve compromised a host or account, with some form of delegation rights configured (constrained or unconstrained). Thus, allowing you to request Kerberos tickets which can be used to impersonate arbitrary users when authenticating against certain SPN&rsquo;s (depending on the delegation configuration).</p>
+<p>I won&rsquo;t go into detail regarding the delegation process as it&rsquo;s rather complex, however, I will refer you to the following resources which cover abusing delegation in-depth:</p>
 <ul>
 <li><a href="https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html">Wagging the Dog</a></li>
 <li><a href="https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/">S4U2Pwnage</a></li>
-<li><a href="https://adsecurity.org/?p=1667">ADSecurity's blog</a></li>
+<li><a href="https://adsecurity.org/?p=1667">ADSecurity&rsquo;s blog</a></li>
 </ul>
 <p>To request a Kerberos ticket which allows us to exploit delegation configurations, we can once again use Impackets <code>getST.py</code> script, however, this time passing the <code>-impersonate</code> flag and specifying the user we wish to impersonate (any valid username):</p>
 <pre><code>[h4x0r@mainframe ~]$ getST.py -spn HOST/SQL01.VELDT.COM 'VELDT.COM/IIS.Admin:Password_Goes_here' -impersonate Administrator -dc-ip 192.168.100.5
@@ -135,11 +149,11 @@ Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 [*]     Requesting S4U2self
 [*]     Requesting S4U2Proxy
 [*] Saving ticket in Administrator.ccache
-</code></pre><p>Note that in the above example the supplied SPN must match one of the SPN's the supplied account is authorized to perform delegation against.</p>
+</code></pre><p>Note that in the above example the supplied SPN must match one of the SPN&rsquo;s the supplied account is authorized to perform delegation against.</p>
 <h2 id="golden-tickets">Golden tickets</h2>
-<p>Who doesn't love getting a Golden Ticket? I know I do, and what's more, I love having the ability to create one without having to mess about with Mimikatz or other Windows tooling which is bound to get flagged by AV at some point in your pen-testing endeavors. That's why we're covering requesting Golden Tickets using the tools available within <code>Impacket</code> (I'm sure you're noticing a pattern here).</p>
+<p>Who doesn&rsquo;t love getting a Golden Ticket? I know I do, and what&rsquo;s more, I love having the ability to create one without having to mess about with Mimikatz or other Windows tooling which is bound to get flagged by AV at some point in your pen-testing endeavors. That&rsquo;s why we&rsquo;re covering requesting Golden Tickets using the tools available within <code>Impacket</code> (I&rsquo;m sure you&rsquo;re noticing a pattern here).</p>
 <p>Now for those of you who are unaware of the concept of Golden Tickets, I shall provide a brief overview. Remember at the start of this blog when I described the need for Ticket Granting Tickets and highlighted the importance of the fact they are encrypted with the <code>krbtgt</code> users NTLM hash? Well, the reason was that this is the crux of Golden Ticket forgery. If we have access to the NTLM hash of the <code>krbtgt</code> user (i.e. dumped it from a Domain Controller), we can forge ourselves Ticket Granting Tickets for any <code>SID</code> we like, and encrypt it with the NTLM hash of the <code>krbtgt</code> user to cement its authenticity.</p>
-<p>You may wonder what the point of forging a Golden Ticket is if you already have the level of access required to dump NTLM hashes from a Domain Controller, and that's understandable. Thus, the following list highlights the benefits of using Golden Tickets during engagements:</p>
+<p>You may wonder what the point of forging a Golden Ticket is if you already have the level of access required to dump NTLM hashes from a Domain Controller, and that&rsquo;s understandable. Thus, the following list highlights the benefits of using Golden Tickets during engagements:</p>
 <ul>
 <li>Golden tickets can be used to escalate privileges between two domains with configured trust relationships (see <a href="http://www.harmj0y.net/blog/redteaming/the-trustpocalypse/">here</a>, <a href="https://dirkjanm.io/active-directory-forest-trusts-part-one-how-does-sid-filtering-work/">here</a>, and <a href="https://adsecurity.org/?p=1640">here</a>)</li>
 <li>Golden Tickets will remain valid even if a users password expires or is changed</li>
@@ -150,7 +164,7 @@ Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 <li>NTLM hash of <code>krbtgt</code> user</li>
 <li>SID of target Domain</li>
 </ul>
-<p>We'll assume you already have the NTLM hash of the <code>krbtgt</code> user, and just skip straight to obtaining the <code>SIDs</code>. To retrieve the target Domains <code>SID</code>, the script <code>lookupsid.py</code> from <code>Impacket</code> can be used as follows, with the target host being the Domain Controller:</p>
+<p>We&rsquo;ll assume you already have the NTLM hash of the <code>krbtgt</code> user, and just skip straight to obtaining the <code>SIDs</code>. To retrieve the target Domains <code>SID</code>, the script <code>lookupsid.py</code> from <code>Impacket</code> can be used as follows, with the target host being the Domain Controller:</p>
 <pre><code>[h4x0r@mainframe ~]$ lookupsid.py veldt.com/jane.adams:Password_Goes_here@192.168.100.5
 Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 
@@ -206,10 +220,10 @@ Microsoft Windows [Version 10.0.17763.737]
 C:\Windows\system32&gt;whoami
 nt authority\system
 </code></pre><h2 id="kerberoasting">Kerberoasting</h2>
-<p>Ah Kerberoasting, what's not to love? If that question is not perceived as rhetorical, I'll provide a brief explanation of why it should be.</p>
-<p>In short, SPN's in Active Directory are often tied to user accounts (as opposed to machine accounts) to allow services such as Databases or Web Servers to access resources based upon permissions configured for Active Directory users. Now, as we've mentioned, Kerberos tickets are encrypted with the NTLM hash of the SPN for which they are requested. Furthermore, the plaintext of the Kerberos ticket is known to the entity which requests it. As a result, it is possible to request Kerberos tickets for services that are configured with SPN's tied to user accounts and perform a brute-force attack to figure out what password was used to encrypt the ticket.</p>
-<p>In many instances, such as the one below, SPN's will be tied to high-privilege (or more commonly over-privileged) Active Directory accounts. Typically this is due to SPN's being automatically configured by applications to have Administrative permissions, or system administrators deploying services where the required permissions are unknown so they just give the service Administrator permissions.</p>
-<p>Below is an example of performing a Kerberoasting attack using <code>Impackets</code> <code>GetUserSPNs.py</code> script. The resulting Kerberos TGS's can be cracked using either John The Ripper or Hashcat (mode 13100).</p>
+<p>Ah Kerberoasting, what&rsquo;s not to love? If that question is not perceived as rhetorical, I&rsquo;ll provide a brief explanation of why it should be.</p>
+<p>In short, SPN&rsquo;s in Active Directory are often tied to user accounts (as opposed to machine accounts) to allow services such as Databases or Web Servers to access resources based upon permissions configured for Active Directory users. Now, as we&rsquo;ve mentioned, Kerberos tickets are encrypted with the NTLM hash of the SPN for which they are requested. Furthermore, the plaintext of the Kerberos ticket is known to the entity which requests it. As a result, it is possible to request Kerberos tickets for services that are configured with SPN&rsquo;s tied to user accounts and perform a brute-force attack to figure out what password was used to encrypt the ticket.</p>
+<p>In many instances, such as the one below, SPN&rsquo;s will be tied to high-privilege (or more commonly over-privileged) Active Directory accounts. Typically this is due to SPN&rsquo;s being automatically configured by applications to have Administrative permissions, or system administrators deploying services where the required permissions are unknown so they just give the service Administrator permissions.</p>
+<p>Below is an example of performing a Kerberoasting attack using <code>Impackets</code> <code>GetUserSPNs.py</code> script. The resulting Kerberos TGS&rsquo;s can be cracked using either John The Ripper or Hashcat (mode 13100).</p>
 <pre><code>[h4x0r@mainframe ~]$ GetUserSPNs.py -dc-ip 192.168.100.5 'VELDT.COM/jane.adams:Password_goes_here'  -request          
 Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 
@@ -221,7 +235,7 @@ $krb5tgs$23$*IIS.Admin$VELDT.COM$HTTP/IIS01.VELDT.COM*$9ae7773caec31e3e4ce94afa3
 ...snipped...
 </code></pre><h2 id="conclusion">Conclusion</h2>
 <p>Hopefully, this post has provided a decent overview of (ab)using Kerberos from Linux, and also demonstrated the reasons why you should do so.</p>
-<p>If you'd like to play about with some of these techniques in a controlled environment, then I'd highly recommend the Offshore Prolab on hackthebox or building your own AD lab as I did while writing this blog.</p>
+<p>If you&rsquo;d like to play about with some of these techniques in a controlled environment, then I&rsquo;d highly recommend the Offshore Prolab on hackthebox or building your own AD lab as I did while writing this blog.</p>
 <p>If you have any questions about Kerberos, lab building, or anything really feel free to give me a message on Twitter (<a href="https://twitter.com/CalumBoal">@CalumBoal</a>), or drop me an email at <a href="mail://calum.boal@onsecurity.co.uk">calum.boal@onsecuriy.co.uk</a>.</p>
 
     </div>
