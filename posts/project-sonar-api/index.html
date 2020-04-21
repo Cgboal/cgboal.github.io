@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name":  null ,
+  "url":  null ,
+  "sameAs": [
+    "https://www.facebook.com/",
+    "https://www.instagram.com/",
+    "https://twitter.com/",
+    "https://github.com/"
+  ]
+}
+</script>
+
+        
+    <title>Searching Project Sonar - Creating a fast API for large datasets // Calum Boal</title>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.68.3" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Calum Boal" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://calumboal.com/css/main.min.59023e5fd38d6ecb0e1dfbb295077c3c67e00e3b9eb3feaf34b5a5e6b332897a.css" />
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Searching Project Sonar - Creating a fast API for large datasets"/>
+<meta name="twitter:description" content="Making Project Sonar Searchable This blog outlines my recent efforts to make Project Sonar a practical source of DNS data when performing security assessments or bug hunting.
+ If you don&rsquo;t care for the rationale or technical details discussed in this blog, the API is currently available free of charge and can be accessed here: https://sonar.omnisint.io
+Additionally, a command-line client has been implemented, which can be obtained by running the following command:"/>
+
+    <meta property="og:title" content="Searching Project Sonar - Creating a fast API for large datasets" />
+<meta property="og:description" content="Making Project Sonar Searchable This blog outlines my recent efforts to make Project Sonar a practical source of DNS data when performing security assessments or bug hunting.
+ If you don&rsquo;t care for the rationale or technical details discussed in this blog, the API is currently available free of charge and can be accessed here: https://sonar.omnisint.io
+Additionally, a command-line client has been implemented, which can be obtained by running the following command:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://calumboal.com/posts/project-sonar-api/" />
+<meta property="article:published_time" content="2020-04-20T14:47:59+01:00" />
+<meta property="article:modified_time" content="2020-04-20T14:47:59+01:00" />
+
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161875522-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-161875522-1');
+</script>
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://calumboal.com/"><img class="app-header-avatar" src="https://calumboal.com/img/avatar.png" alt="Calum Boal" /></a>
+      <h1>Calum Boal</h1>
+      <div style="display: inline-block">
+	 <script src="https://www.hackthebox.eu/badge/6894"></script>
+     </div>
+      <p>Pwning networks for OnSecurity. | OSCP | CRT |</p>
+      <div class="app-header-social">
+        
+          <a target="_blank" href="https://github.com/cgboal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg></a>
+        
+          <a target="_blank" href="https://twitter.com/@CalumBoal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-twitter">
+  <title>twitter</title>
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+</svg></a>
+        
+      </div>
+      <br>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Searching Project Sonar - Creating a fast API for large datasets</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Apr 20, 2020
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          10 min read
+        </div></div>
+    </header>
+    <div class="post-content">
+      <h1 id="making-project-sonar-searchable">Making Project Sonar Searchable</h1>
+<p>This blog outlines my recent efforts to make Project Sonar a practical source of DNS data when performing security assessments or bug hunting.</p>
+<hr>
+<p>If you don&rsquo;t care for the rationale or technical details discussed in this blog, the API is currently available free of charge and can be accessed here: <a href="https://sonar.omnisint.io">https://sonar.omnisint.io</a></p>
+<p>Additionally, a command-line client has been implemented, which can be obtained by running the following command:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get github.com/cgboal/SonarSearch/crobat-client
+
+crobat-client --init
+</code></pre></div><hr>
+<h3 id="ok-but-why">Ok, but why?</h3>
+<p>Project Sonar, developed by Rapid7, is an internet-wide survey that aims to gather large amounts of information such as port scan data, SSL certificates, and DNS records. Moreover, Rapid7 very generously makes these datasets available to Security Researchers at no additional cost. For more information regarding Project Sonar, <a href="https://opendata.rapid7.com/about/">click here</a>.</p>
+<p>In this blog, we are primarily concerned with the DNS record data collected by Project Sonar. The DNS data is represented in JSON, and the dataset for A records alone is made up of 183GB of JSON data and is updated approximately every week. As you can imagine, this quantity of DNS data makes for an excellent resource when performing DNS reconnaissance activities.</p>
+<p>For example, while you may use tools such as <a href="https://github.com/OWASP/Amass">OWASPs Amass</a>, or <a href="https://github.com/projectdiscovery/subfinder">Subfinder</a> for DNS enumeration, these tools can take a few minutes to run, and often require making many DNS requests (depending on configurations). Furthermore, the data retrieved from Project Sonar may differ from that which is discovered via the aforementioned tools, so having an additional data source is also welcomed but, more on this later.</p>
+<h3 id="the-problem">The problem</h3>
+<p>Right, now that we&rsquo;re all in agreement that Project Sonar is awesome and we&rsquo;d like to use it in our DNS enumeration activities, we&rsquo;re good to go&hellip; right? Well not quite, due to the size of the Project Sonar datasets, searching these datasets for DNS information can take an unrealistically long time (~20 minutes). Moreover, it can often be unrealistic to have access to a 183GB JSON file at any time, especially for road warriors working limited hard disk capacity.</p>
+<h2 id="building-a-solution">Building a solution</h2>
+<p>To address these issues, I started by throwing all the Project Sonar data into MongoDB because it&rsquo;s well suited to retrieving records from large datasets, and it&rsquo;s super easy to import JSON data. However, once the data was imported it was still very, very slow to query.</p>
+<p>Having not used MongoDB before, I was rather unimpressed and started researching optimizations. Very quickly I encountered the concept of creating Indexes within collections of data. Created Indexes can then be used to narrow down the search space within the collection when trying to retrieve records.</p>
+<h3 id="indexing-the-data">Indexing the data</h3>
+<p>In MongoDB, there are many different kinds of Indexes, including text indexes which allow data to be retrieved around ten times faster than would be possible with a regular expression search. Unfortunately, text indexes were still not fast enough to make an API based solution practical. The reason for poor performance was that it is much more difficult to find a substring when the substring you are searching for is not located at the start of the string being searched.</p>
+<p>To this end, it made the most sense to use a segment of a domain name as the Index. In this instance, the domain name without a top-level-domain, or subdomains was chosen.</p>
+<p>For example, if a domain in the database has the name:</p>
+<pre><code>www.calumboal.com
+</code></pre><p>The Index value would be and shall be referred to as the <code>domain_index</code> from here on out:</p>
+<pre><code>calumboal
+</code></pre><p>This particular substring of the fully qualified domain name was chosen as it allows searching for all TLDs of a given domain, as well as all subdomains.</p>
+<p>To optimize queries which requested subdomains for both a domain, and TLD (e.g. all subdomains of onsecurity.co), a composite index was also created consisting of the domain, and TLD components.</p>
+<p>To use the above domain_index format as an Index in MongoDB, the <code>domain_index</code> has to be extracted from each FQDN in the 183GB Project Sonar Database.</p>
+<h3 id="stripping-tlds">Stripping TLDs</h3>
+<p>To make matters worse, removing TLD&rsquo;s from Domain names is not as simple as it may seem. These days are over 4000 TLDs, and the number of components in them varies. For example, <code>calumboal.com</code> has only one TLD component whereas <code>onsecurity.co.uk</code> has two. Thus, there is no way to know how many components of an FQDN are used for the TLD without checking which TLD is in use.</p>
+<p>My initial solution used Regular expressions to do a find and replace operation on a FQDN for each TLD (at least until a match was found). However, this proved to be <em>extremely slow</em>, with the processing of 100k FQDN&rsquo;s taking an average of 5 seconds, and this was after large amounts of concurrency had been introduced into the program executing the Regular Expression.</p>
+<p>In the end, I changed tactics and implemented a <a href="https://en.wikipedia.org/wiki/Suffix_array">suffix array</a> search (<a href="https://stackoverflow.com/questions/2487576/trie-vs-suffix-tree-vs-suffix-array">similar to a Trie</a>), which is capable of searching for string prefixes extremely quickly and efficiently. Trie searches can be easily implemented in Golang using <a href="https://golang.org/pkg/index/suffixarray/">suffix array package</a> present within the standard library. As TLDs come at the end of a string, I split the last component of a FQDN and checked if it was a TLD. If it wasn&rsquo;t, I checked the last two components of the FQDN, etc, until a match was found. Once a match was found, the number of components that had been checked when the match was found was used to calculate the offset of the domain component within the FQDN.</p>
+<p>Using this approach the <strong>time taken to process 100k domains was reduced from 5 seconds to 0.04</strong>. I have open-sourced the domain parser I wrote for this, it is capable of extracting subdomains, FQDN, and <code>domain_indexes</code> incredibly quickly. The source code for this can be found <a href="https://github.com/Cgboal/DomainParser">here</a>.</p>
+<p>Below are the benchmarks calculated for the parser:
+<img src="https://i.imgur.com/n9A57IZ.gif" alt=""></p>
+<p>The above table shows that it took 0.036 seconds to parse 100k domains, and 0.36 seconds to parse 1 million domains.</p>
+<p>With efficient parsing achieved, it was possible to generate the <code>domain_index</code> value every domain in Project Sonars A record Dataset in roughly 1-2 hours. Whereas it was estimated to take multiple weeks when using Regular Expressions.</p>
+<p>A MongoDB importer for the Project Sonar A record Dataset was then created which enriched each record with the <code>domain_index</code> value on the fly and inserted the records into MongoDB. The speed of this importer was found to be similar to that MongoDB&rsquo;s native <code>mongoimport</code> utility, although perhaps a bit slower. Nevertheless, it is much faster to import the data directly into MongoDB after enriching it with the <code>domain_index</code> than writing the enriched JSON to a file and then importing it.</p>
+<p>The importer created for this project, along with the API described in the following section can be found <a href="https://github.com/Cgboal/Sonar">here</a>.</p>
+<h3 id="writing-an-api">Writing an API</h3>
+<p>To make the newly indexed data accessible, a REST API was written in Go. The API allows the retrieval of subdomains for a specific FQDN, TLDs for a domain, and also all subdomains for any TLD of a given domain.</p>
+<p>The implemented endpoints are as follows:</p>
+<pre><code>/subdomains/{domain.tld}
+/tlds/{domain}
+/all/{domain}
+</code></pre><p><img src="https://i.imgur.com/C1MnN5F.gif" alt=""></p>
+<h3 id="performance">Performance</h3>
+<p>So, was all that effort actually worth it? Let&rsquo;s take a look at some benchmarks to compare the speed, accuracy, and completeness of results obtains from DNS enumeration tools.</p>
+<p>For the sake of transparency, the running of each tool was timed, and then the results were resolved using ZDNS. The output of ZDNS was then filtered using jq, and the resolvable domain names were then sorted by unique. For example:</p>
+<pre><code>cat $method | zdns A -name-servers 1.1.1.1 | jq -r 'select (.data.answers[].answer != &quot;&quot;) | .name' | sort -u | wc -l 
+</code></pre><h4 id="spotifycom"><code>spotify.com</code></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>#Domains</th>
+<th>#Resolvable</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Crobat</td>
+<td>150</td>
+<td>150</td>
+<td>1.1s</td>
+</tr>
+<tr>
+<td>DNSDumpster</td>
+<td>70</td>
+<td>69</td>
+<td>9.7s</td>
+</tr>
+<tr>
+<td>Subfinder</td>
+<td>665</td>
+<td>297</td>
+<td>46s</td>
+</tr>
+<tr>
+<td>Amass</td>
+<td>504</td>
+<td>503</td>
+<td>15m</td>
+</tr>
+<tr>
+<td>Amass (passive)</td>
+<td>1107</td>
+<td>164</td>
+<td>1.5m</td>
+</tr>
+</tbody>
+</table>
+<h4 id="googlecom"><code>google.com</code></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>#Domains</th>
+<th>#Resolvable</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Crobat</td>
+<td>25537</td>
+<td>23508</td>
+<td>30s</td>
+</tr>
+<tr>
+<td>DNSDumpster</td>
+<td>100</td>
+<td>100</td>
+<td>9s</td>
+</tr>
+<tr>
+<td>Subfinder</td>
+<td>28922</td>
+<td>23670</td>
+<td>44m</td>
+</tr>
+<tr>
+<td>Amass</td>
+<td>10965</td>
+<td>10852</td>
+<td>24h+</td>
+</tr>
+<tr>
+<td>Amass (passive)</td>
+<td>31684</td>
+<td>23533</td>
+<td>3m</td>
+</tr>
+</tbody>
+</table>
+<p>As can be seen above, while the Crobat API is significantly faster than other methods of subdomain discovery, the Sonar dataset does lack coverage in comparison to other tools. However, these approaches are not necessarily comparable, as Amass and Subfinder perform a much wider range of enumeration activities than simply pulling querying Sonar, and thus have greater datasets at their disposal.</p>
+<p>Moreover, Amass also uses the Sonar data set as one of its sources, however, it fails to return results from Sonar when a domain with a significantly large number of subdomains is requested (i.e. zendesk.com). Clearly, in the second test case, Amass run without the <code>-passive</code> flag had some issues.</p>
+<p>Now, we shall look at the results from the above tests and identify whether the Sonar dataset returned any results which were not identified by the other methods:</p>
+<h4 id="spotifycom-1"><code>spotify.com</code></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>#Domains unique to Crobat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subfinder</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Amass</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Amass (passive)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h4 id="googlecom-1"><code>google.com</code></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>#Domains unique to Crobat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subfinder</td>
+<td>47</td>
+</tr>
+<tr>
+<td>Amass</td>
+<td>14589</td>
+</tr>
+<tr>
+<td>Amass (passive)</td>
+<td>58</td>
+</tr>
+</tbody>
+</table>
+<p>So overall it appears that the benefit of using the Crobat API in conjunction with other tools when performing subdomain discovery varies depending on the target domain, providing that absolute coverage is your primary goal.</p>
+<p>However, that is not to say there is no value in being able to quickly query such a large data source, especially if you would like a general overview of an organization&rsquo;s assets, as opposed to a comprehensive list.</p>
+<h4 id="performance-under-load">Performance under load</h4>
+<p>While I do not have proper benchmarks for this, testing found that many clients could perform a large number of queries per second for different domains whilst still obtaining accurate results.</p>
+<p>Doing a load test for a query of a single domain showed that the API was able to successfully handle an average of 700 requests per second. Although, the database does cache the results of lookup after the first query, so this is kind of irrelevant.</p>
+<h4 id="caveats">Caveats</h4>
+<p>Due to the current implementation of paging, retrieving all pages of extremely large queries can take an increasingly long time. For example, zendesk.com which has 100 million+ subdomains. I do aim to optimize this further in the future, however, if anyone has any ideas on how to increase performance in this area, give me a shout.</p>
+<h3 id="conclusions">Conclusions</h3>
+<p>This project was a lot of fun to work on, especially optimizing the initial parsing of the dataset into an indexable format. I believe that the project has also achieved its goal of making Project Sonar searchable in a time-efficient manner.</p>
+<p>However, the results of the comparisons to other subdomain discovery tools do show that it is best to use a variety of data sources when aiming for full coverage of an organization&rsquo;s digital footprint.</p>
+<p>Nevertheless, I believe there is certainly value in being able to perform extremely quick queries of the Project Sonars dataset, especially when it comes to on the fly operations where doing active DNS enumeration would incur a significant bottleneck. Additionally, the ability to retrieve all entries for a given domain across all TLD&rsquo;s is also extremely valuable, and not possible out of the box using other DNS reconnaissance tools (as far as I&rsquo;m aware).</p>
+<h3 id="future-work">Future Work</h3>
+<p>In the future, I intend to add an endpoint that allows you to retrieve all DNS entries with a given subdomain. For example, you could search for all domains which begin with <code>Citrix.</code>, as I believe this would be valuable to researchers. However, this will likely have to wait until the pagination problem is resolved.</p>
+<p>Additionally, I may add an option to return a count of all records which match a query, as counting the records is <strong>significantly</strong> faster than retrieving them, and this may prove useful for trend analysis or determining whether new entries are available for organizations which are being tracked.</p>
+<p>Finally, I am considering performing active enumeration using other subdomain enumeration tools to enrich the data provided by the Crobat API from Rapid7&rsquo;s Project Sonar dataset. Primarily, this would be performed for bug bounty targets. However, I wouldn&rsquo;t hold your breath for this. If someone wants to handle the automation of active DNS enumeration, I am happy to write some endpoints which accept submissions to the database.</p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+    <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  </body>
+</html>

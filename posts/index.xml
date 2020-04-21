@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Calum Boal</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 26 Jan 2020 18:32:56 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 20 Apr 2020 14:47:59 +0100</lastBuildDate>
     
 	<atom:link href="https://calumboal.com/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Searching Project Sonar - Creating a fast API for large datasets</title>
+      <link>https://calumboal.com/posts/project-sonar-api/</link>
+      <pubDate>Mon, 20 Apr 2020 14:47:59 +0100</pubDate>
+      
+      <guid>https://calumboal.com/posts/project-sonar-api/</guid>
+      <description>Making Project Sonar Searchable This blog outlines my recent efforts to make Project Sonar a practical source of DNS data when performing security assessments or bug hunting.
+ If you don&amp;rsquo;t care for the rationale or technical details discussed in this blog, the API is currently available free of charge and can be accessed here: https://sonar.omnisint.io
+Additionally, a command-line client has been implemented, which can be obtained by running the following command:</description>
+    </item>
     
     <item>
       <title>(Ab)using Kerberos from Linux</title>
