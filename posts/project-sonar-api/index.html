@@ -100,10 +100,10 @@
 <hr>
 <p>If you don&rsquo;t care for the rationale or technical details discussed in this blog, the API is currently available free of charge and can be accessed here: <a href="https://sonar.omnisint.io">https://sonar.omnisint.io</a></p>
 <p>Additionally, a command-line client has been implemented, which can be obtained by running the following command:</p>
-<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get github.com/cgboal/SonarSearch/crobat-client
+<pre><code>go get github.com/cgboal/SonarSearch/crobat-client
 
 crobat-client --init
-</code></pre></div><hr>
+</code></pre><hr>
 <h3 id="ok-but-why">Ok, but why?</h3>
 <p>Project Sonar, developed by Rapid7, is an internet-wide survey that aims to gather large amounts of information such as port scan data, SSL certificates, and DNS records. Moreover, Rapid7 very generously makes these datasets available to Security Researchers at no additional cost. For more information regarding Project Sonar, <a href="https://opendata.rapid7.com/about/">click here</a>.</p>
 <p>In this blog, we are primarily concerned with the DNS record data collected by Project Sonar. The DNS data is represented in JSON, and the dataset for A records alone is made up of 183GB of JSON data and is updated approximately every week. As you can imagine, this quantity of DNS data makes for an excellent resource when performing DNS reconnaissance activities.</p>
