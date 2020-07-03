@@ -20,7 +20,7 @@
         
     <title>(Ab)using Kerberos from Linux // Calum Boal</title>
     <meta charset="utf-8" />
-    <meta name="generator" content="Hugo 0.68.3" />
+    <meta name="generator" content="Hugo 0.72.0" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="Calum Boal" />
     <meta name="description" content="A guide on various Kerberos abuse and exploitation techniques, including kerberoasting, golden tickets, contrained delegation, unconstrained delegation, silver tickets, TGT&#39;s, all from Linux using Impacket" />
@@ -56,6 +56,9 @@
       <h1>Calum Boal</h1>
       <div style="display: inline-block">
 	 <script src="https://www.hackthebox.eu/badge/6894"></script>
+     </div>
+     <div style="display: inline-block">
+        <a href="https://www.buymeacoffee.com/cgboal" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-white_img.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
      </div>
       <p>Pwning networks for OnSecurity. | OSCP | CRT |</p>
       <div class="app-header-social">
@@ -117,7 +120,7 @@
 </ul>
 <h2 id="working-with-tickets">Working with tickets</h2>
 <h3 id="requesting-tickets">Requesting tickets</h3>
-<p>Now, onto the good stuff. First things first, we should know how to retrieve tickets for the services we wish to access. Tickets can be easily requested using <a href="https://github.com/SecureAuthCorp/impacket">impacket</a>&lsquo;s <code>getST.py</code> (get silver ticket) script. If <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> is installed properly, <code>getST.py</code> should be on your <code>$PATH</code>, if not, <code>getST.py</code> along with the other <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> scripts mentioned throughout this blog can be found in the <code>examples</code> folder of the <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> repository.</p>
+<p>Now, onto the good stuff. First things first, we should know how to retrieve tickets for the services we wish to access. Tickets can be easily requested using <a href="https://github.com/SecureAuthCorp/impacket">impacket</a>&rsquo;s <code>getST.py</code> (get silver ticket) script. If <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> is installed properly, <code>getST.py</code> should be on your <code>$PATH</code>, if not, <code>getST.py</code> along with the other <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> scripts mentioned throughout this blog can be found in the <code>examples</code> folder of the <a href="https://github.com/SecureAuthCorp/impacket">impacket</a> repository.</p>
 <p>Below is an example of the syntax used to request a ticket for the user <code>jane.adams</code> of the <code>veldt.com</code> domain, for the <code>cifs</code> (SMB) service (Principal) on the host <code>DC01.VELDT.COM</code>. The combination of the service (principal) and the host on which the service resides is referred to as the Service Principal Name (SPN).</p>
 <pre><code>[h4x0r@mainframe ~]$ getST.py -dc-ip 192.168.100.5 -spn cifs/DC01.VELDT.COM 'VELDT.COM/jane.adams:Password_goes_here' 
 Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
