@@ -6,10 +6,19 @@
     <description>Recent content on Calum Boal</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 20 Apr 2020 14:47:59 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 31 Aug 2020 00:00:00 +0100</lastBuildDate>
     
 	<atom:link href="https://calumboal.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>So you want to be a pentester?</title>
+      <link>https://calumboal.com/posts/so-you-want-to-be-a-pentester/</link>
+      <pubDate>Mon, 31 Aug 2020 00:00:00 +0100</pubDate>
+      
+      <guid>https://calumboal.com/posts/so-you-want-to-be-a-pentester/</guid>
+      <description>The other day I posted on Twitter that my DMs were open to anyone who needed advice in their Cyber Security journey. Turns out there are a lot of you looking for advice. After receiving 200+ DMs I noticed that the majority of them are asking similar questions. As a result, I figured it&amp;rsquo;d be best to write a blog post to answer these questions since it&amp;rsquo;ll take me forever to answer everyone individually, and this way I can provide high-quality answers to all.</description>
+    </item>
     
     <item>
       <title>Searching Project Sonar - Creating a fast API for large datasets</title>
