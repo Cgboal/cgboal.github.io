@@ -20,7 +20,7 @@
         
     <title>(Ab)using Kerberos from Linux // Calum Boal</title>
     <meta charset="utf-8" />
-    <meta name="generator" content="Hugo 0.74.3" />
+    <meta name="generator" content="Hugo 0.79.0" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="Calum Boal" />
     <meta name="description" content="A guide on various Kerberos abuse and exploitation techniques, including kerberoasting, golden tickets, contrained delegation, unconstrained delegation, silver tickets, TGT&#39;s, all from Linux using Impacket" />
@@ -133,7 +133,7 @@ Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 <pre><code>[h4x0r@mainframe ~]$ export KRB5CCNAME=jane.adams.ccache 
 </code></pre><p>With the <code>KRB5CCNAME</code> environment variable now set, we can use the obtained ticket to authenticate as the previously specified user against the previously specified service.</p>
 <p>Before we can successfully authenticate, we must make sure that we attempt to authenticate using information identical to that which was used when requesting the ticket. For example, we must refer to the target host by its fully qualified domain name when specifying the target (<code>jane.adams@dc01.veldt.com</code>). If DNS is not correctly configured for the internal domain in use, it possible to verbosely state the IP address of the target (<code>-target-ip</code>) and domain controller (<code>-dc-ip</code>). In many instances, the errors you encounter when trying to use Kerberos tickets from Linux will occur due to inconsistencies between information supplied when requesting, and using tickets.</p>
-<p>In the example below, we use the previously retrieved Kerberos ticket to connect to <code>DC01</code> using <code>Impacket</code>'s <code>smbclient.py</code> script. Note the usage of <code>-k</code>, which specifies that Kerberos authentication should be used:</p>
+<p>In the example below, we use the previously retrieved Kerberos ticket to connect to <code>DC01</code> using <code>Impacket</code>&rsquo;s <code>smbclient.py</code> script. Note the usage of <code>-k</code>, which specifies that Kerberos authentication should be used:</p>
 <pre><code>[h4x0r@mainframe ~]$ smbclient.py jane.adams@DC01.VELDT.COM -k -no-pass
 Impacket v0.9.21-dev - Copyright 2019 SecureAuth Corporation
 

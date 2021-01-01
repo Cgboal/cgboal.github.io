@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name":  null ,
+  "url":  null ,
+  "sameAs": [
+    "https://www.facebook.com/",
+    "https://www.instagram.com/",
+    "https://twitter.com/",
+    "https://github.com/"
+  ]
+}
+</script>
+
+        
+    <title>gRPC Made Easy - Project Corbat // Calum Boal</title>
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.79.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Calum Boal" />
+    <meta name="description" content="A guide to implementing gRPC servers and clients for high performance web API&#39;s, including cross-language implementations" />
+    <link rel="stylesheet" href="https://calumboal.com/css/main.min.59023e5fd38d6ecb0e1dfbb295077c3c67e00e3b9eb3feaf34b5a5e6b332897a.css" />
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="gRPC Made Easy - Project Corbat"/>
+<meta name="twitter:description" content="A guide to implementing gRPC servers and clients for high performance web API&#39;s, including cross-language implementations"/>
+
+    <meta property="og:title" content="gRPC Made Easy - Project Corbat" />
+<meta property="og:description" content="A guide to implementing gRPC servers and clients for high performance web API&#39;s, including cross-language implementations" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://calumboal.com/posts/grpc-made-easy/" />
+<meta property="article:published_time" content="2021-01-01T13:32:56+01:00" />
+<meta property="article:modified_time" content="2021-01-01T13:32:56+01:00" />
+
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161875522-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-161875522-1');
+</script>
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://calumboal.com/"><img class="app-header-avatar" src="https://calumboal.com/img/avatar.png" alt="Calum Boal" /></a>
+      <h1>Calum Boal</h1>
+      <div style="display: inline-block">
+	 <script src="https://www.hackthebox.eu/badge/6894"></script>
+     </div>
+     <div style="display: inline-block">
+<style>.bmc-button img{height: 34px !important;width: 35px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{padding: 7px 15px 7px 10px !important;line-height: 35px !important;height:51px !important;text-decoration: none !important;display:inline-flex !important;color:#ffffff !important;background-color:#79D6B5 !important;border-radius: 5px !important;border: 1px solid transparent !important;padding: 7px 15px 7px 10px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#ffffff !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/cgboal"><img src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px;font-size:28px !important;">Buy me a coffee</span></a>
+     </div>
+      <p>Pwning networks for OnSecurity. | OSCP | CRT |</p>
+      <div class="app-header-social">
+        
+          <a target="_blank" href="https://github.com/cgboal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg></a>
+        
+          <a target="_blank" href="https://twitter.com/@CalumBoal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-twitter">
+  <title>twitter</title>
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+</svg></a>
+        
+      </div>
+      <br>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">gRPC Made Easy - Project Corbat</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jan 1, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          11 min read
+        </div></div>
+    </header>
+    <div class="post-content">
+      <h1 id="grpc-made-easy---project-crobat">gRPC made easy - Project Crobat</h1>
+<p>In this post, I will be going over the implementation of the gRPC API used by Project Crobat. I figured this would make a good post as gRPC is, in my opinion, very cool and the use-case employed by Project Crobat is simple enough to provide a real-world example of its usage.</p>
+<h2 id="why-grpc">Why gRPC</h2>
+<p>So, you may be wondering why I&rsquo;m even writing this post at all. What is gRPC? Why should I use it? Is it worth my time? These are all perfectly valid questions, and my answer to each of them would be simply &ldquo;yes&rdquo;. However, as I am not a highly regarded source of truth, I&rsquo;ll take the time to justify my answer. So without further adue, what is gRPC and why should I use it?</p>
+<p>gRPC is an RPC framework created by google designed to allow for the simple implementation of API&rsquo;s as specified by a protobuf specification (more on this later). The main benefits of gRPC are as follows:</p>
+<ul>
+<li>Supports simple implementations of data streaming over HTTP/2</li>
+<li>Uses a binary protocol to transfer data in a concise way, thus vastly reducing the time taken to transfer data between the server and clients</li>
+<li>Protobuf provides an API specification that can be as a reference and allows for easy validation of messages</li>
+<li>The protobuf specification can be used to generate code for both a gRPC server and a client library (basically an SDK)</li>
+<li>From a single protobuf specification, client implementations can be automatically generated for the most popular languages</li>
+</ul>
+<p>In comparison to a REST JSON API, gRPC is between 5 and 20 times faster due to it&rsquo;s more concise transfer format and the speed of parsing protobuf messages.</p>
+<p>While gRPC is typically used for microservice communications, it can also be used with web applications, however, I have not tried this out yet.</p>
+<h2 id="project-crobat-overview">Project Crobat Overview</h2>
+<p>In this post, we will be covering the implementation of a gRPC API for Project Crobat. If you don&rsquo;t know what Project Crobat is, you can check out my other post [here] detailing its creation.</p>
+<p>In short, Project Crobat is an API that indexes a massive dataset of DNS records provided by Rapid7&rsquo;s Project Sonar. The dataset contains approximately 1.9 billion rows of JSON totaling around 190GB of data, and as a result, some queries can return exceptionally large JSON responses. For example, a reverse DNS lookup on a <code>/8</code> network.</p>
+<p>For this reason, a gRPC API was implemented which makes use of streaming to increase result transfer speeds and reduce the resources required to satisfy the API requests both on the client, and server-side.</p>
+<h2 id="building-an-api">Building an API</h2>
+<p>Okay, now that&rsquo;s out of the way, onto the fun stuff. What do we need for a gRPC API then?</p>
+<ul>
+<li>protobuf API definition</li>
+<li>RPC server implementation</li>
+<li>A client to relentlessly consume the data</li>
+</ul>
+<p>Before we get started on the implementation details, the full source code of Project Crobat can be found on Github <a href="https://github.com/Cgboal/SonarSearch">here</a> in case you want to follow along.</p>
+<h4 id="a-word-on-rpc-design">A word on RPC design</h4>
+<p>If after reading this blog you decide to dive in and build something using gRPC but the paradigm shift from REST leaves you a little unsure how to structure your RPC API, <a href="https://cloud.google.com/apis/design">Google has some great docs on gRPC API design</a>.</p>
+<h2 id="protowhat">Protowhat?</h2>
+<p>You&rsquo;ve been going on about this protobuf thing for ages, just what is it exactly? Well, it&rsquo;s probably easier to show you than explain it, so take a look at the below screenshot containing the protobuf file for Project Crobat</p>
+<p><img src="https://i.imgur.com/dLNIDBM.png" alt=""></p>
+<p>As can be seen above, the protobuf file starts with a syntax version, and a package name before moving on to define a service.</p>
+<p>This service is our API, the RPC endpoints within it are equivalent to our routes in a normal REST API.</p>
+<p>Below the service definition, the message formats can be seen. These message formats define what the requests and responses used by the API will look like. While this may seem overly verbose to some of you, in languages such as Go where you&rsquo;d be defining structs to deserialize JSON anyway, it really isn&rsquo;t too bad by comparison. Additionally, it&rsquo;s actually very helpful to have the format of your requests and responses all together in one file for easy viewing.</p>
+<p>Now, back to the RPC definitions, which have the following structure
+<code>rpc FunctionName (ReqeustMessage) returns (ReplyMessage)</code></p>
+<p>The first message is the message which will be passed into the RPC function when the client calls it, and the second is the message type that is returned by the endpoint. The numbers contained in these definitions are necessary, but in most cases will just be sequential, so don&rsquo;t worry about it too much. Finally, the <code>repeated</code> keyword simply indicates that the field is an array of another type, whether that be a primitive type like <code>int</code> or <code>string</code>, or another used-defined message.</p>
+<p>The hawk-eyed among you may have noticed the <code>stream</code> keyword in the <code>ReplyMessage</code> segment of the RPC definition. This simply indicates that the endpoint returns a stream of the message in question, as opposed to a single message. The same can be done with the <code>RequestMessage</code> segment to indicate that the client will be streaming results to the server.</p>
+<h2 id="generating-code-for-fun-and-profit">Generating code for fun and profit</h2>
+<p>Great, so now we have our protobuf specification so we can glance at it and see what our requests and responses should look like, we&rsquo;re done here, right?</p>
+<p>Not quite, now that we&rsquo;ve written our protobuf definition we can actually do something really cool with it. We can generate client and server implementations for these RPC endpoints. For the server, these take the form of interfaces or classes which can be implemented to provide RPC endpoints. For the client, this process generates an importable library that contains functions that can be called to invoke the RPCs (essentially an autogenerated SDK).</p>
+<p>What&rsquo;s more is that these server and client libraries can be generated for basically all popular languages, meaning that gRPC is a great choice for microservices where different teams use different tech stacks.</p>
+<p>To generate the Go code for the protobuf definition, the following command is run from the parent directory:</p>
+<p><code>protoc -I proto proto/crobat.proto --go_out=plugins=grpc:proto</code></p>
+<p>In this command, we specify the directory the protobuf file is in, along with the location of the protobuf file itself (don&rsquo;t ask me why). Next, we specify which language we want to generate the code for, as well as the plugin options.</p>
+<p>The above command generates this <code>crobat.pb.go</code> file which is then used to implement a server or construct a client.</p>
+<h2 id="streaming-endpoints">Streaming endpoints</h2>
+<p>Cool, so now let&rsquo;s take a look at the implementation of a gRPC server with streaming endpoints. First, we need to create a gRPC server type. For Project Crobat, the server creation looks like this:</p>
+<p><img src="https://i.imgur.com/uPHFhxj.png" alt=""></p>
+<p>However, in a simple implementation, none of these struct fields would be required, nor a factory function.</p>
+<p>Now we can take a look at the implementation of one of these RPC calls which hangs off the Server type in the form of a method.</p>
+<p><img src="https://i.imgur.com/6lpG8On.png" alt=""></p>
+<p>The most notable thing about the above screenshot is the method signature. First, we have the name <code>GetSubdomains</code> which must match the one specified in the protobuf spec. Then, we take a parameter of type <code>crobat.QueryRequest</code>, which is the same as the message we defined in our protobuf definition. Finally, we take a stream parameter which is the stream we will send the results of the query over. This type of stream parameter will always take the format <code>ServiceName_RPCFunctionServer</code>.</p>
+<p>If that went a bit over your head, I&rsquo;d recommend checking out the gRPC docs in your native programming language.</p>
+<p>The next handful of lines in the above example are just handling the request, however, one thing to note is that the usage of <code>query.Query</code>. As we have defined the message format, the data given to our function has already been deserialized and can be accessed via dot notation, which is nice.</p>
+<p>Things start to get interesting again once we hit the for loop, for this is where we start using the stream.</p>
+<p><img src="https://i.imgur.com/QVCBr5m.png" alt=""></p>
+<p>One amazing thing about streaming endpoints is that cursor objects used to read database queries are typically also a type of stream in that you read objects out one by one. When using non-streaming API&rsquo;s, you would have to collect all the rows from the query, hold them in memory, serialize them, and send them off to the client. Depending on the result size this can require a lot of RAM and may require pagination which in itself can have performance overheads.</p>
+<p>In this example, we are able to create a new Domain message (as defined in the protobuf spec), and send it off to the client through the stream for each row read from the database. Handing off data like this keeps the memory usage of the request pretty static regardless of the size of the result set, which is a lifesaver for something such as Project Crobat.</p>
+<p>To send the newly created Domain message to the client, we simply call <code>stream.Send(DomainMessage)</code>. Can&rsquo;t get much easier than that.</p>
+<h2 id="building-a-client">Building a client</h2>
+<p>Well, we&rsquo;ve got a gRPC server now, which is great but what good is that without a client to consume it? Fortunately, building a client is incredibly simple thanks to the code generation we performed during previous steps. First things first, we&rsquo;re going to need to create a client as shown in the below code snippet.</p>
+<p><img src="https://i.imgur.com/YkoN3qH.png" alt=""></p>
+<p>Note that we are passing an empty instance of <code>tls.Config{}</code> as transport credentials. This is because our API does not require authentication, and this may be different depending on your implementation. The additional lines where we return a <code>CrobatClient</code> is simply returning a struct so that we can define our own methods that hang off it if needed.</p>
+<p>Now that we have a client, we have to make calls to the API. This is done using the autogenerated functions which have the same name as the endpoints defined in your protobuf file. For Project Crobat, we have the following RPC endpoints defined:</p>
+<p><img src="https://i.imgur.com/HFkoQT9.png" alt=""></p>
+<p>Thus, if we want to retrieve a list of subdomains, we will be calling the generated client method <code>GetSubdomains</code>.</p>
+<h3 id="consuming-streams">Consuming streams</h3>
+<p>As the <code>GetSubdomains</code> endpoints is a streaming endpoint, we need to know how to consume the data sent over the stream. First, we create a stream instance by calling <code>client.GetSubdomains</code> while passing it an instance of <code>QueryRequest</code>, a message type defined in our protobuf file.</p>
+<p>We then enter an infinite loop which will read from the stream with error handling in place to break out of the loop if an EOF exception is encountered. In Project Crobat, the implementation of this endpoint is shown below, however, note that there is some additional stuff going on due to the way the stream is used and the general structure of the application:</p>
+<p><img src="https://i.imgur.com/3xZtHCg.png" alt=""></p>
+<p>As can be seen above, the code used to interact with the gRPC API is extremely minimal due to the code generation performed by <code>protoc</code>.</p>
+<h2 id="cross-language-implementation">Cross-language implementation</h2>
+<p>Ok, so now we have a functional gRPC server as well as a functional client that can retrieve subdomains from the API. One of the great things about gRPC is that you can employ code generation to generate code in many different languages which can be used to implement servers or clients for the defined gRPC API structure.</p>
+<p>For example, let&rsquo;s say you&rsquo;re writing a Python script and you&rsquo;d like to interact with the streaming endpoints provided by Project Crobats API. First, we need to install the required dependencies:</p>
+<pre><code>pip install grpcio grpc-tools
+</code></pre><p>Then, we simply need to acquire a copy of the protobuf definition for the Crobat API, and then run the following command:</p>
+<pre><code>python -m grpc_tools.protoc -I=proto --python_out=. --grpc_python_out=. proto/crobat.proto  
+</code></pre><p>The above command generates a Python library that can be used to talk to the gRPC API. Once that is complete, we can implement a simple client to retrieve subdomains from the Project Crobat API. The full code required to do this can be seen below:</p>
+<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#5bc4bf">import</span> <span style="color:#fec418">crobat_pb2</span>
+<span style="color:#5bc4bf">import</span> <span style="color:#fec418">crobat_pb2_grpc</span>
+<span style="color:#5bc4bf">import</span> <span style="color:#fec418">grpc</span>
+<span style="color:#5bc4bf">import</span> <span style="color:#fec418">sys</span>
+
+<span style="color:#776e71"># Create a channel with blank ssl credentials</span>
+channel <span style="color:#5bc4bf">=</span> grpc<span style="color:#5bc4bf">.</span>secure_channel(<span style="color:#48b685">&#34;crobat-rpc.omnisint.io:443&#34;</span>, grpc<span style="color:#5bc4bf">.</span>ssl_channel_credentials())
+
+<span style="color:#776e71"># Create a client, passing the channel</span>
+client <span style="color:#5bc4bf">=</span> crobat_pb2_grpc<span style="color:#5bc4bf">.</span>CrobatStub(channel)
+
+<span style="color:#776e71"># Create a query, setting the query as first cli arg</span>
+query <span style="color:#5bc4bf">=</span> crobat_pb2<span style="color:#5bc4bf">.</span>QueryRequest()
+query<span style="color:#5bc4bf">.</span>query <span style="color:#5bc4bf">=</span> sys<span style="color:#5bc4bf">.</span>argv[<span style="color:#f99b15">1</span>]
+
+<span style="color:#776e71"># Iterate over stream, printing subdomains</span>
+<span style="color:#815ba4">for</span> subdomain <span style="color:#5bc4bf">in</span> client<span style="color:#5bc4bf">.</span>GetSubdomains(query):
+    <span style="color:#815ba4">print</span>(subdomain<span style="color:#5bc4bf">.</span>domain)
+</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<p>This blog has covered the basics of creating a fast, multi-language API using gRPC. While this blog focussed primarily on streaming endpoints, gRPC also supports unary endpoints (standard, non-streaming requests), as well as client-side streaming, and bi-directional streaming endpoints. These are all pretty straightforward to implement, so I recommend checking out the <a href="https://grpc.io/docs/">gRPC Docs</a> if you&rsquo;re interested.</p>
+<p>Additionally, it is possible to build gRPC API&rsquo;s which can be transcoded to JSON to allow languages that do not support gRPC to interact with them. This would typically be used within browser contexts, however, there is now pretty decent support for interacting with gRPC endpoints directly via code generation provided by <a href="https://github.com/grpc/grpc-web">gRPC-Web</a>.</p>
+<p>I have personally used gRPC-Web for a project and found it to work quite well, although you do lose some of the performance benefits provided by gRPC as gRPC web doesn&rsquo;t fully support end to end streaming (a proxy handles the streaming and collates it into one big response which is then sent to the browser).</p>
+<p>If you&rsquo;ve made it this far, thanks for reading, and I hope this has helped you gain an understanding of how to work with gRPC.</p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+    <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  </body>
+</html>

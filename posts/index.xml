@@ -6,10 +6,16 @@
     <description>Recent content in Posts on Calum Boal</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 31 Aug 2020 00:00:00 +0100</lastBuildDate>
-    
-	<atom:link href="https://calumboal.com/posts/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Fri, 01 Jan 2021 13:32:56 +0100</lastBuildDate><atom:link href="https://calumboal.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gRPC Made Easy - Project Corbat</title>
+      <link>https://calumboal.com/posts/grpc-made-easy/</link>
+      <pubDate>Fri, 01 Jan 2021 13:32:56 +0100</pubDate>
+      
+      <guid>https://calumboal.com/posts/grpc-made-easy/</guid>
+      <description>gRPC made easy - Project Crobat In this post, I will be going over the implementation of the gRPC API used by Project Crobat. I figured this would make a good post as gRPC is, in my opinion, very cool and the use-case employed by Project Crobat is simple enough to provide a real-world example of its usage.
+Why gRPC So, you may be wondering why I&amp;rsquo;m even writing this post at all.</description>
+    </item>
     
     <item>
       <title>So you want to be a pentester?</title>
