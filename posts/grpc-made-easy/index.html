@@ -177,24 +177,24 @@
 </code></pre><p>Then, we simply need to acquire a copy of the protobuf definition for the Crobat API, and then run the following command:</p>
 <pre><code>python -m grpc_tools.protoc -I=proto --python_out=. --grpc_python_out=. proto/crobat.proto  
 </code></pre><p>The above command generates a Python library that can be used to talk to the gRPC API. Once that is complete, we can implement a simple client to retrieve subdomains from the Project Crobat API. The full code required to do this can be seen below:</p>
-<div class="highlight"><pre style="color:#e7e9db;background-color:#2f1e2e;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#5bc4bf">import</span> <span style="color:#fec418">crobat_pb2</span>
-<span style="color:#5bc4bf">import</span> <span style="color:#fec418">crobat_pb2_grpc</span>
-<span style="color:#5bc4bf">import</span> <span style="color:#fec418">grpc</span>
-<span style="color:#5bc4bf">import</span> <span style="color:#fec418">sys</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> crobat_pb2
+<span style="color:#f92672">import</span> crobat_pb2_grpc
+<span style="color:#f92672">import</span> grpc
+<span style="color:#f92672">import</span> sys
 
-<span style="color:#776e71"># Create a channel with blank ssl credentials</span>
-channel <span style="color:#5bc4bf">=</span> grpc<span style="color:#5bc4bf">.</span>secure_channel(<span style="color:#48b685">&#34;crobat-rpc.omnisint.io:443&#34;</span>, grpc<span style="color:#5bc4bf">.</span>ssl_channel_credentials())
+<span style="color:#75715e"># Create a channel with blank ssl credentials</span>
+channel <span style="color:#f92672">=</span> grpc<span style="color:#f92672">.</span>secure_channel(<span style="color:#e6db74">&#34;crobat-rpc.omnisint.io:443&#34;</span>, grpc<span style="color:#f92672">.</span>ssl_channel_credentials())
 
-<span style="color:#776e71"># Create a client, passing the channel</span>
-client <span style="color:#5bc4bf">=</span> crobat_pb2_grpc<span style="color:#5bc4bf">.</span>CrobatStub(channel)
+<span style="color:#75715e"># Create a client, passing the channel</span>
+client <span style="color:#f92672">=</span> crobat_pb2_grpc<span style="color:#f92672">.</span>CrobatStub(channel)
 
-<span style="color:#776e71"># Create a query, setting the query as first cli arg</span>
-query <span style="color:#5bc4bf">=</span> crobat_pb2<span style="color:#5bc4bf">.</span>QueryRequest()
-query<span style="color:#5bc4bf">.</span>query <span style="color:#5bc4bf">=</span> sys<span style="color:#5bc4bf">.</span>argv[<span style="color:#f99b15">1</span>]
+<span style="color:#75715e"># Create a query, setting the query as first cli arg</span>
+query <span style="color:#f92672">=</span> crobat_pb2<span style="color:#f92672">.</span>QueryRequest()
+query<span style="color:#f92672">.</span>query <span style="color:#f92672">=</span> sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">1</span>]
 
-<span style="color:#776e71"># Iterate over stream, printing subdomains</span>
-<span style="color:#815ba4">for</span> subdomain <span style="color:#5bc4bf">in</span> client<span style="color:#5bc4bf">.</span>GetSubdomains(query):
-    <span style="color:#815ba4">print</span>(subdomain<span style="color:#5bc4bf">.</span>domain)
+<span style="color:#75715e"># Iterate over stream, printing subdomains</span>
+<span style="color:#66d9ef">for</span> subdomain <span style="color:#f92672">in</span> client<span style="color:#f92672">.</span>GetSubdomains(query):
+    <span style="color:#66d9ef">print</span>(subdomain<span style="color:#f92672">.</span>domain)
 </code></pre></div><h2 id="conclusion">Conclusion</h2>
 <p>This blog has covered the basics of creating a fast, multi-language API using gRPC. While this blog focussed primarily on streaming endpoints, gRPC also supports unary endpoints (standard, non-streaming requests), as well as client-side streaming, and bi-directional streaming endpoints. These are all pretty straightforward to implement, so I recommend checking out the <a href="https://grpc.io/docs/">gRPC Docs</a> if you&rsquo;re interested.</p>
 <p>Additionally, it is possible to build gRPC API&rsquo;s which can be transcoded to JSON to allow languages that do not support gRPC to interact with them. This would typically be used within browser contexts, however, there is now pretty decent support for interacting with gRPC endpoints directly via code generation provided by <a href="https://github.com/grpc/grpc-web">gRPC-Web</a>.</p>
